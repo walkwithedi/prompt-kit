@@ -16,4 +16,4 @@
 5. Scripts use only the Python standard library, run on Python 3.8+, log to stderr in the format used by the other scripts and accept --log-level.
 6. No personal data, work details or credentials, ever: run python3 scripts/sensitive_scan.py. Examples use obviously fictional names (Riverside Clinic, Project Atlas), example.com addresses and the documentation IP ranges (192.0.2.0/24). Commit with your GitHub noreply address.
 7. No case stories, no background. Documentation, skill text, commit messages and pull requests state rules and behaviour, not where they came from: no anecdotes, no description of the environment, organisation, people or projects something was built for, and no figures taken from real documents. Where an example is needed, keep it minimal and fictional.
-8. Releases are automatic: a merge to main releases each changed skill. Do not push release tags by hand.
+8. Releases are automatic: a merge to main releases each changed skill and, when anything in it changed, the whole kit. Do not push release tags by hand.
