@@ -29,13 +29,17 @@ The skills and prompts are written in Chinese, answer in Chinese and are trigger
 
 Claude Code and other terminal assistants: copy `skills/<skill>/` into the assistant's skills folder (for example `~/.claude/skills/`).
 
+**Everything at once**
+
+Download `prompt-kit-vYYYY.MM.DD.zip` from [Releases](https://github.com/walkwithedi/prompt-kit/releases): every skill folder (`SKILL.md`, `prompt.md`, READMEs) laid out as in this repository under `prompt-kit/`. For claude.ai, upload the single-skill zips above instead.
+
 **As a prompt**
 
 Open `prompt.md` in the skill's folder, copy everything in the code block and paste it into a chat; put any material after the 「材料」 line.
 
 ## Releases
 
-Every merge to main releases each changed skill as `<skill>-vYYYY.MM.DD` with that skill's zip attached.
+Every merge to main releases each changed skill as `<skill>-vYYYY.MM.DD` with that skill's zip attached, and, when any skill, the root READMEs or LICENSE changed, the whole kit as `prompt-kit-vYYYY.MM.DD` (marked latest).
 
 ## Contributing
 

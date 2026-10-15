@@ -27,13 +27,17 @@
 
 Claude Code 等终端助手：把 `skills/<skill>/` 目录复制到助手的 skills 目录（例如 `~/.claude/skills/`）。
 
+**一次取全部**
+
+在 [Releases](https://github.com/walkwithedi/prompt-kit/releases) 下载 `prompt-kit-vYYYY.MM.DD.zip`：内含全部 skill 目录（`SKILL.md`、`prompt.md`、README），按本仓库结构放在 `prompt-kit/` 下。上传 claude.ai 请改用上面的单个 skill zip。
+
 **作为提示词**
 
 打开对应目录的 `prompt.md`，复制代码块里的全部文字，粘贴到对话框；需要材料时贴在「材料」一行后面。
 
 ## 发版
 
-合并到 main 后，有改动的 skill 自动发布 Release「<skill>-vYYYY.MM.DD」，附件为该 skill 的 zip。
+合并到 main 后，有改动的 skill 自动发布 Release「<skill>-vYYYY.MM.DD」，附件为该 skill 的 zip；任一 skill、根目录 README 或 LICENSE 有改动时，另发布全量合集「prompt-kit-vYYYY.MM.DD」（标为最新）。
 
 ## 参与
 
