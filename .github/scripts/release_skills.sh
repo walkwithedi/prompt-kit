@@ -7,7 +7,8 @@
 # commits that touched the folder since the last release as its notes. These releases are not marked latest.
 # Then, on a full run (no arguments), the whole kit: when skills/, README.md, README.zh-CN.md or
 # LICENSE changed since the latest tag "prompt-kit-vYYYY.MM.DD[.N]", or there is none, release
-# prompt-kit-v<version>.zip (git archive of those paths under prompt-kit/), marked latest.
+# prompt-kit-v<version>.zip (git archive of those paths under prompt-kit/) together with every
+# skill's upload zip as <skill>.zip, marked latest.
 # Environment: DRY_RUN=1 builds and prints the plan without calling gh; FORCE=1 releases unchanged
 # skills too; OUT_DIR sets the build folder.
 set -euo pipefail
@@ -103,12 +104,22 @@ TAG="$BUNDLE-v$VER"
 ZIP="$OUT_DIR/$TAG.zip"
 git archive --format=zip --prefix="$BUNDLE/" -o "$ZIP" "$SHA" "${BUNDLE_PATHS[@]}"
 log "$BUNDLE: last=${LAST:-none} new=$TAG asset=$ZIP ($(unzip -Z1 "$ZIP" | wc -l) entries)"
+# Each skill's upload zip as well, so the latest release offers every single skill
+ASSETS=("$ZIP")
+SKILL_DIR="$OUT_DIR/$TAG-skills"
+for skill in "${SKILLS[@]}"; do
+  [ -f "skills/$skill/SKILL.md" ] || continue
+  BUILT=$(python3 scripts/build_skill.py "$SKILL_DIR" "$skill" --version "$VER" --log-level WARNING)
+  mv "$BUILT" "$SKILL_DIR/$skill.zip"
+  ASSETS+=("$SKILL_DIR/$skill.zip")
+done
+log "$BUNDLE: assets ${ASSETS[*]##*/}"
 
 NOTES="$OUT_DIR/$TAG.notes.md"
 {
-  echo "$TAG.zip holds every skill folder (SKILL.md, prompt.md, READMEs) with the root READMEs and LICENSE from commit ${SHA:0:7}, laid out as in the repository under $BUNDLE/. To upload a single skill to claude.ai, use its own <skill>-v*.zip release."
+  echo "$TAG.zip holds every skill folder (SKILL.md, prompt.md, READMEs) with the root READMEs and LICENSE from commit ${SHA:0:7}, laid out as in the repository under $BUNDLE/. Each <skill>.zip holds <skill>/SKILL.md from the same commit; upload it on the Skills page of claude.ai settings."
   echo
-  echo "$TAG.zip 内含提交 ${SHA:0:7} 的全部 skill 目录（SKILL.md、prompt.md、README）及根目录 README 与 LICENSE，按仓库结构放在 $BUNDLE/ 下。单个 skill 上传 claude.ai 请用各自的 <skill>-v*.zip。"
+  echo "$TAG.zip 内含提交 ${SHA:0:7} 的全部 skill 目录（SKILL.md、prompt.md、README）及根目录 README 与 LICENSE，按仓库结构放在 $BUNDLE/ 下。各 <skill>.zip 内含同一提交的 <skill>/SKILL.md，可在 claude.ai 设置的 Skills 页面上传。"
   echo
   if [ -n "$LAST" ]; then echo "Changes since $LAST:"; else echo "Changes:"; fi
   echo
@@ -117,7 +128,7 @@ NOTES="$OUT_DIR/$TAG.notes.md"
 
 if [ "$DRY_RUN" = 1 ]; then
   log "$BUNDLE: DRY_RUN, no release. Notes:"; cat "$NOTES" >&2
-elif gh release create "$TAG" "$ZIP" \
+elif gh release create "$TAG" "${ASSETS[@]}" \
     --repo "$REPO" --target "$SHA" --title "$TAG" --notes-file "$NOTES" --latest; then
   git tag "$TAG" "$SHA"
   log "$BUNDLE: released ${GITHUB_SERVER_URL:-https://github.com}/$REPO/releases/tag/$TAG"

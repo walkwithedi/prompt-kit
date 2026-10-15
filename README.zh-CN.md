@@ -21,7 +21,7 @@
 
 **作为 skill**
 
-1. 在 [Releases](https://github.com/walkwithedi/prompt-kit/releases) 下载要用的 `<skill>-vYYYY.MM.DD.zip`（顶层为 `<skill>/` 目录，内含 `SKILL.md`）。
+1. 在[最新版](https://github.com/walkwithedi/prompt-kit/releases/latest)下载 `<skill>.zip`，或在该 skill 自己的 Release 下载 `<skill>-vYYYY.MM.DD.zip`（两者顶层都是 `<skill>/` 目录，内含 `SKILL.md`）。
 2. 在 claude.ai 设置的 Skills 页面上传 zip 并启用。
 3. 在对话里说出口令，并给出要处理的内容。
 
@@ -37,7 +37,7 @@ Claude Code 等终端助手：把 `skills/<skill>/` 目录复制到助手的 ski
 
 ## 发版
 
-合并到 main 后，有改动的 skill 自动发布 Release「<skill>-vYYYY.MM.DD」，附件为该 skill 的 zip；任一 skill、根目录 README 或 LICENSE 有改动时，另发布全量合集「prompt-kit-vYYYY.MM.DD」（标为最新）。
+合并到 main 后，有改动的 skill 自动发布 Release「<skill>-vYYYY.MM.DD」，附件为该 skill 的 zip；任一 skill、根目录 README 或 LICENSE 有改动时，另发布全量合集「prompt-kit-vYYYY.MM.DD」，并附全部 skill 的 `<skill>.zip`（标为最新）。
 
 ## 参与
 
