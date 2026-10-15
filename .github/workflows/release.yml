@@ -1,0 +1,44 @@
+name: release
+# On every push to main (or by hand): each skill folder changed since its last release tag
+# "<skill>-vYYYY.MM.DD[.N]", or never released, gets a release with <skill>-v<version>.zip
+# (.github/scripts/release_skills.sh). Unchanged skills are skipped.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      skills:
+        description: "Only these skills (folder names, space separated; empty for all)"
+        required: false
+        default: ""
+      force:
+        description: "Release unchanged skills too"
+        type: boolean
+        default: false
+permissions:
+  contents: write
+concurrency:
+  group: release
+  cancel-in-progress: false
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Check
+        run: python scripts/check_skills.py
+      - name: Release changed skills
+        env:
+          SKILLS: ${{ inputs.skills }}
+          FORCE: ${{ inputs.force && '1' || '0' }}
+          OUT_DIR: ${{ runner.temp }}/release
+        run: |
+          # SKILLS is unquoted on purpose: one argument per folder name
+          bash .github/scripts/release_skills.sh $SKILLS
