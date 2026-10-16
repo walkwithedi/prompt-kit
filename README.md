@@ -23,7 +23,7 @@ The skills and prompts are written in Chinese, answer in Chinese and are trigger
 
 **As a skill**
 
-1. Download `<skill>-vYYYY.MM.DD.zip` from [Releases](https://github.com/walkwithedi/prompt-kit/releases) (it holds a `<skill>/` folder with `SKILL.md`).
+1. Download `<skill>.zip` from the [latest release](https://github.com/walkwithedi/prompt-kit/releases/latest), or `<skill>-vYYYY.MM.DD.zip` from that skill's own release (either holds a `<skill>/` folder with `SKILL.md`).
 2. Upload the zip on the Skills page of claude.ai settings and turn it on.
 3. Say a trigger phrase in a chat and give the material to work on.
 
@@ -39,7 +39,7 @@ Open `prompt.md` in the skill's folder, copy everything in the code block and pa
 
 ## Releases
 
-Every merge to main releases each changed skill as `<skill>-vYYYY.MM.DD` with that skill's zip attached, and, when any skill, the root READMEs or LICENSE changed, the whole kit as `prompt-kit-vYYYY.MM.DD` (marked latest).
+Every merge to main releases each changed skill as `<skill>-vYYYY.MM.DD` with that skill's zip attached, and, when any skill, the root READMEs or LICENSE changed, the whole kit as `prompt-kit-vYYYY.MM.DD` with every skill's `<skill>.zip` attached (marked latest).
 
 ## Contributing
 

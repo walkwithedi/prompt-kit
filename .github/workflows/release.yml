@@ -3,7 +3,7 @@ name: release
 # "<skill>-vYYYY.MM.DD[.N]", or never released, gets a release with <skill>-v<version>.zip
 # (.github/scripts/release_skills.sh). Unchanged skills are skipped. A full run (no skills given)
 # also releases the whole kit as prompt-kit-v<version>.zip when skills/, the root READMEs or LICENSE
-# changed since the last "prompt-kit-v*" tag; that release is marked latest.
+# changed since the last "prompt-kit-v*" tag, with every skill's zip as <skill>.zip; it is marked latest.
 on:
   push:
     branches: [main]
