@@ -26,3 +26,7 @@
 ## 版本说明
 
 - v1.0（2026-10-16）：首个开源版本。
+
+## 反馈
+
+意见和建议请发邮件到 [hong.xie.me@outlook.com](mailto:hong.xie.me@outlook.com)。

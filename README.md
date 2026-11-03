@@ -57,3 +57,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). Security problems: [SECURITY.md](SECURIT
 ## License
 
 [MIT](LICENSE)
+
+## Feedback
+
+Send suggestions and feedback to [hong.xie.me@outlook.com](mailto:hong.xie.me@outlook.com).
