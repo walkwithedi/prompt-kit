@@ -14,6 +14,6 @@
 3. SKILL.md 与 prompt.md 规则相同，须在同一个 PR 里一起修改。prompt.md 的规则放在唯一一个 ```text 代码块里，并有「适用场景：」行。
 4. skill 和提示词用中文写；README 分英文（README.md）和中文（README.zh-CN.md）两份，内容一致。每次改动都记入两份 skill README 的版本说明。
 5. 脚本只用 Python 标准库，支持 Python 3.8+，日志按其他脚本的格式输出到标准错误，并提供 --log-level 参数。
-6. 不得出现个人信息、工作信息和凭据：运行 python3 scripts/sensitive_scan.py。示例用明显虚构的名称（如「某某有限公司」「张三」）、example.com 地址和文档专用 IP 段（192.0.2.0/24）。提交用 GitHub noreply 邮箱。
+6. 不得出现个人信息、工作信息和凭据：运行 python3 scripts/sensitive_scan.py。唯一的例外是 README「反馈」一节里维护者公开的反馈邮箱，扫描器只放行这一个地址。示例用明显虚构的名称（如「某某有限公司」「张三」）、example.com 地址和文档专用 IP 段（192.0.2.0/24）。提交用 GitHub noreply 邮箱。
 7. 不写案例和背景：文档、skill 正文、提交说明和 PR 只写规则和行为，不写来历，不写经历，不描述工具服务的环境、单位、人员和项目，不引用真实文档里的数字。确需举例时只给最小的虚构例子。
 8. 发版自动进行：合并到 main 后，有改动的 skill 自动发布，内容有变化时另发布全量合集。不要手动推送发版 tag。版本号取版本说明最新一条「- vX.Y（YYYY-MM-DD）：……」，两份 README 须一致（合集取根目录 README）。改了 SKILL.md 或 prompt.md 要升 X.Y；只改 README 不升，发版为下一个修订号 vX.Y.(Z+1)。`python3 scripts/run_checks.py` 对改了 SKILL.md 或 prompt.md 却没升 X.Y、中英文 README 版本不一致的情况报错。

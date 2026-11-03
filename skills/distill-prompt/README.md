@@ -28,3 +28,7 @@ Both versions follow the same rules and are changed together.
 ## Version notes
 
 - v1.0 (2026-10-16): First open-source release.
+
+## Feedback
+
+Send suggestions and feedback to [hong.xie.me@outlook.com](mailto:hong.xie.me@outlook.com).

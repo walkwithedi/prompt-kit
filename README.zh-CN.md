@@ -55,3 +55,7 @@ Claude Code 等终端助手：把 `skills/<skill>/` 目录复制到助手的 ski
 ## 许可证
 
 [MIT](LICENSE)
+
+## 反馈
+
+意见和建议请发邮件到 [hong.xie.me@outlook.com](mailto:hong.xie.me@outlook.com)。
