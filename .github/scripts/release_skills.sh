@@ -1,23 +1,28 @@
 #!/usr/bin/env bash
 # Release each skill that changed: bash .github/scripts/release_skills.sh [skill ...]
 # A skill is a folder under skills/. With no arguments every skill is checked.
-# For each skill: take its latest tag "<skill>-vYYYY.MM.DD[.N]"; when skills/<skill>/ is unchanged
-# since that tag, skip it. Otherwise create a release versioned with today's date (Asia/Shanghai)
-# whose asset is <skill>-v<version>.zip (scripts/build_skill.py: <skill>/SKILL.md only), with the
-# commits that touched the folder since the last release as its notes. These releases are not marked latest.
-# Then, on a full run (no arguments), the whole kit: when skills/, README.md, README.zh-CN.md or
-# LICENSE changed since the latest tag "prompt-kit-vYYYY.MM.DD[.N]", or there is none, release
-# prompt-kit-v<version>.zip (git archive of those paths under prompt-kit/) together with every
+# Versions and whether to release come from scripts/versions.py plan: a skill's version is the
+# newest entry of the version notes in its README.md and README.zh-CN.md (vX.Y, the same in both),
+# and its tags are "<skill>-vX.Y.Z". When skills/<skill>/ changed since the last release: a higher
+# X.Y releases vX.Y.0; an unchanged X.Y with only README changes releases vX.Y.(Z+1); SKILL.md or
+# prompt.md changed without a higher X.Y fails without releasing. The last release is the latest
+# by commit order among the old date tags "<skill>-vYYYY.MM.DD[.N]" and the new tags; after a date
+# tag, or with none, the release is vX.Y.0. Each release has <tag>.zip (scripts/build_skill.py:
+# <skill>/SKILL.md only) and the commits that touched the folder since the last release as notes;
+# these releases are not marked latest.
+# Then, on a full run (no arguments), the whole kit by the same rules, versioned from the version
+# notes of the root READMEs and watching skills/, README.md, README.zh-CN.md and LICENSE: it
+# releases prompt-kit-vX.Y.Z.zip (git archive of those paths under prompt-kit/) together with every
 # skill's upload zip as <skill>.zip, marked latest.
 # Environment: DRY_RUN=1 builds and prints the plan without calling gh; FORCE=1 releases unchanged
-# skills too; OUT_DIR sets the build folder.
+# skills too (as a README-only change); OUT_DIR sets the build folder. A failing skill does not
+# stop the others; the script exits non-zero at the end.
 set -euo pipefail
 log(){ echo "[release] $*" >&2; }
 
 ROOT="$(git rev-parse --show-toplevel)"
 cd "$ROOT"
 SHA="$(git rev-parse HEAD)"
-TODAY="$(TZ=Asia/Shanghai date +%Y.%m.%d)"
 OUT_DIR="${OUT_DIR:-$(mktemp -d)}"
 DRY_RUN="${DRY_RUN:-0}"
 FORCE="${FORCE:-0}"
@@ -34,35 +39,30 @@ else
     d="${d%/}"; SKILLS+=("${d#skills/}")
   done
 fi
-log "commit=$SHA date=$TODAY skills=${SKILLS[*]} DRY_RUN=$DRY_RUN FORCE=$FORCE out=$OUT_DIR"
-
-# Next free version: YYYY.MM.DD for the first release of the day, then .2, .3 ...
-next_version(){
-  local name="$1" ver="$TODAY" n=1
-  while git rev-parse -q --verify "refs/tags/$name-v$ver" >/dev/null; do
-    n=$((n + 1)); ver="$TODAY.$n"
-  done
-  echo "$ver"
-}
+log "commit=$SHA skills=${SKILLS[*]} DRY_RUN=$DRY_RUN FORCE=$FORCE out=$OUT_DIR"
 
 FAILED=0
-for skill in "${SKILLS[@]}"; do
-  if [ ! -f "skills/$skill/SKILL.md" ]; then
-    echo "::error::$skill is not a skill folder (no skills/$skill/SKILL.md)" >&2; FAILED=1; continue
-  fi
-  LAST=$(git tag -l "$skill-v[0-9]*" --sort=-v:refname | head -n1)
-  if [ -n "$LAST" ]; then
-    if [ "$FORCE" != 1 ] && git diff --quiet "$LAST" "$SHA" -- "skills/$skill/"; then
-      log "$skill: unchanged since $LAST, skipped"; continue
-    fi
-    RANGE="$LAST..$SHA"
-  else
-    RANGE="$SHA"
-  fi
-  VER=$(next_version "$skill")
-  TAG="$skill-v$VER"
+PLAN_ARGS=(plan --head "$SHA")
+[ "$FORCE" = 1 ] && PLAN_ARGS+=(--force)
+[ "$FULL_RUN" = 1 ] && PLAN_ARGS+=(--kit)
+PLAN="$(python3 scripts/versions.py "${PLAN_ARGS[@]}" "${SKILLS[@]}")"
+log "plan (name, action, new tag, last tag, reason):"
+echo "$PLAN" >&2
+KIT_LINE=""
+
+while IFS=$'\t' read -r skill action TAG LAST msg <&3; do
+  [ -n "$skill" ] || continue
+  if [ "$skill" = prompt-kit ]; then KIT_LINE="$action"$'\t'"$TAG"$'\t'"$LAST"$'\t'"$msg"; continue; fi
+  [ "$TAG" = - ] && TAG=""
+  [ "$LAST" = - ] && LAST=""
+  case "$action" in
+    skip) log "$skill: $msg, skipped"; continue ;;
+    error) echo "::error::$msg" >&2; FAILED=1; continue ;;
+  esac
+  if [ -n "$LAST" ]; then RANGE="$LAST..$SHA"; else RANGE="$SHA"; fi
+  VER="${TAG#"$skill"-v}"
   ZIP=$(python3 scripts/build_skill.py "$OUT_DIR" "$skill" --version "$VER" --log-level WARNING)
-  log "$skill: last=${LAST:-none} new=$TAG asset=$ZIP ($(unzip -Z1 "$ZIP" | tr '\n' ' '))"
+  log "$skill: last=${LAST:-none} new=$TAG ($msg) asset=$ZIP ($(unzip -Z1 "$ZIP" | tr '\n' ' '))"
 
   NOTES="$OUT_DIR/$TAG.notes.md"
   {
@@ -82,9 +82,9 @@ for skill in "${SKILLS[@]}"; do
       --repo "$REPO" --target "$SHA" --title "$TAG" --notes-file "$NOTES" --latest=false; then
     echo "::error::$skill: creating release $TAG failed" >&2; FAILED=1; continue
   fi
-  git tag "$TAG" "$SHA"   # recorded locally so a second release today in this run gets the next number
+  git tag "$TAG" "$SHA"   # recorded locally for the rest of this run
   log "$skill: released ${GITHUB_SERVER_URL:-https://github.com}/$REPO/releases/tag/$TAG"
-done
+done 3<<< "$PLAN"
 
 # Whole kit: only on a full run, so a hand-picked list of skills never releases it
 BUNDLE=prompt-kit
@@ -93,17 +93,18 @@ if [ "$FULL_RUN" != 1 ]; then
   log "$BUNDLE: skills given, skipped"
   exit "$FAILED"
 fi
-LAST=$(git tag -l "$BUNDLE-v[0-9]*" --sort=-v:refname | head -n1)
-if [ -n "$LAST" ] && [ "$FORCE" != 1 ] && git diff --quiet "$LAST" "$SHA" -- "${BUNDLE_PATHS[@]}"; then
-  log "$BUNDLE: unchanged since $LAST, skipped"
-  exit "$FAILED"
-fi
+IFS=$'\t' read -r action TAG LAST msg <<< "$KIT_LINE"
+[ "$TAG" = - ] && TAG=""
+[ "$LAST" = - ] && LAST=""
+case "$action" in
+  skip) log "$BUNDLE: $msg, skipped"; exit "$FAILED" ;;
+  error) echo "::error::$msg" >&2; exit 1 ;;
+esac
 if [ -n "$LAST" ]; then RANGE="$LAST..$SHA"; else RANGE="$SHA"; fi
-VER=$(next_version "$BUNDLE")
-TAG="$BUNDLE-v$VER"
+VER="${TAG#"$BUNDLE"-v}"
 ZIP="$OUT_DIR/$TAG.zip"
 git archive --format=zip --prefix="$BUNDLE/" -o "$ZIP" "$SHA" "${BUNDLE_PATHS[@]}"
-log "$BUNDLE: last=${LAST:-none} new=$TAG asset=$ZIP ($(unzip -Z1 "$ZIP" | wc -l) entries)"
+log "$BUNDLE: last=${LAST:-none} new=$TAG ($msg) asset=$ZIP ($(unzip -Z1 "$ZIP" | wc -l) entries)"
 # Each skill's upload zip as well, so the latest release offers every single skill
 ASSETS=("$ZIP")
 SKILL_DIR="$OUT_DIR/$TAG-skills"

@@ -1,9 +1,12 @@
 name: release
-# On every push to main (or by hand): each skill folder changed since its last release tag
-# "<skill>-vYYYY.MM.DD[.N]", or never released, gets a release with <skill>-v<version>.zip
-# (.github/scripts/release_skills.sh). Unchanged skills are skipped. A full run (no skills given)
-# also releases the whole kit as prompt-kit-v<version>.zip when skills/, the root READMEs or LICENSE
-# changed since the last "prompt-kit-v*" tag, with every skill's zip as <skill>.zip; it is marked latest.
+# On every push to main (or by hand): .github/scripts/release_skills.sh releases each skill folder
+# changed since its last release, versioned from the newest entry of its README version notes
+# (vX.Y): "<skill>-vX.Y.0" when X.Y went up, "<skill>-vX.Y.(Z+1)" when only READMEs changed; a
+# SKILL.md or prompt.md change without a higher X.Y fails without releasing (rules in
+# scripts/versions.py). The last release is found by commit order among the old date tags
+# "<skill>-vYYYY.MM.DD[.N]" and the new tags. A full run (no skills given) also releases the whole
+# kit as prompt-kit-vX.Y.Z.zip, versioned from the root READMEs, when skills/, the root READMEs or
+# LICENSE changed, with every skill's zip as <skill>.zip; it is marked latest.
 on:
   push:
     branches: [main]
@@ -14,7 +17,7 @@ on:
         required: false
         default: ""
       force:
-        description: "Release unchanged skills too"
+        description: "Release unchanged skills too (as a README-only change)"
         type: boolean
         default: false
 permissions:
@@ -35,7 +38,9 @@ jobs:
         with:
           python-version: "3.12"
       - name: Check
-        run: python scripts/check_skills.py
+        run: |
+          python scripts/check_skills.py
+          python scripts/versions.py check
       - name: Release changed skills
         env:
           SKILLS: ${{ inputs.skills }}

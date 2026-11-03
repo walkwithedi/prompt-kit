@@ -2,7 +2,11 @@
 """Run every local check a commit must pass, in the order CI runs them.
 
   1. skill folders         scripts/check_skills.py
-  2. personal data         scripts/sensitive_scan.py
+  2. versions              scripts/versions.py check (version notes parse and agree in both
+                           READMEs; SKILL.md or prompt.md changed since the last release only
+                           with a higher X.Y)
+  3. release tests         python -m unittest discover -s tests
+  4. personal data         scripts/sensitive_scan.py
 
 Used by the git pre-commit hook (.githooks/pre-commit), the Claude Code hooks
 (.claude/hooks/) and by hand before a pull request. Prints one line per check and the
@@ -10,7 +14,7 @@ output of any check that fails. Exit code 1 when any check fails.
 
 Usage:
   python3 scripts/run_checks.py
-  python3 scripts/run_checks.py --skip scan      leave out checks by name (skills, scan)
+  python3 scripts/run_checks.py --skip scan      leave out checks by name (skills, versions, tests, scan)
 """
 import argparse
 import logging
@@ -24,6 +28,8 @@ LOG_FORMAT = "%(asctime)s [%(levelname)s] %(name)s.%(funcName)s:%(lineno)d - %(m
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CHECKS = [
     ("skills", ["scripts/check_skills.py"]),
+    ("versions", ["scripts/versions.py", "check"]),
+    ("tests", ["-m", "unittest", "discover", "-s", "tests"]),
     ("scan", ["scripts/sensitive_scan.py"]),
 ]
 

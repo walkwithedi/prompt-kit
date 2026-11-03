@@ -25,6 +25,6 @@ As a prompt: open [`prompt.md`](prompt.md), copy everything in the code block an
 
 Both versions follow the same rules and are changed together.
 
-## Changes
+## Version notes
 
-- First open-source release.
+- v1.0 (2026-10-16): First open-source release.
