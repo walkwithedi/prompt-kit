@@ -11,7 +11,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - {os: ubuntu-latest, python: "3.8"}
+          # ubuntu-latest no longer offers Python 3.8; 22.04 does
+          - {os: ubuntu-22.04, python: "3.8"}
           - {os: ubuntu-latest, python: "3.12"}
           - {os: windows-latest, python: "3.12"}
     runs-on: ${{ matrix.os }}
@@ -19,11 +20,18 @@ jobs:
       PYTHONIOENCODING: utf-8
     steps:
       - uses: actions/checkout@v7
+        with:
+          # the version check compares with the last release tags
+          fetch-depth: 0
       - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python }}
       - name: Skill folders
         run: python scripts/check_skills.py
+      - name: Versions
+        run: python scripts/versions.py check
+      - name: Release tests
+        run: python -m unittest discover -s tests -v
       - name: Build zips
         shell: bash
         run: python scripts/build_skill.py "$RUNNER_TEMP/zips" $(ls skills)

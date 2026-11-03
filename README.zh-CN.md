@@ -37,7 +37,16 @@ Claude Code 等终端助手：把 `skills/<skill>/` 目录复制到助手的 ski
 
 ## 发版
 
-合并到 main 后，有改动的 skill 自动发布 Release「<skill>-vYYYY.MM.DD」，附件为该 skill 的 zip；任一 skill、根目录 README 或 LICENSE 有改动时，另发布全量合集「prompt-kit-vYYYY.MM.DD」，并附全部 skill 的 `<skill>.zip`（标为最新）。
+合并到 main 后，有改动的 skill 自动发布 Release「<skill>-vX.Y.Z」，附件为该 skill 的 zip；任一 skill、根目录 README 或 LICENSE 有改动时，另发布全量合集「prompt-kit-vX.Y.Z」，并附全部 skill 的 `<skill>.zip`（标为最新）。
+
+- 版本号取版本说明最新一条「- vX.Y（YYYY-MM-DD）：……」，README.md 与 README.zh-CN.md 须一致：skill 取其目录下的两份 README，合集取下面根目录 README 的版本说明。界面写 vX.Y，tag 再加 .Z。
+- X.Y 升高时发 vX.Y.0；X.Y 没变、只改了 README 时发 vX.Y.(Z+1)；改了 SKILL.md、prompt.md（合集还包括 LICENSE）却没升 X.Y 的不发版，PR 检查（`python3 scripts/run_checks.py`）报错；中英文 README 版本不一致时同样报错。
+- 此前按日期发布的「<skill>-vYYYY.MM.DD」保留。上次发版按新旧 tag 的提交先后判断，不比较 tag 名称；日期 tag 之后的首次发版为 vX.Y.0。
+- 预演：`DRY_RUN=1 bash .github/scripts/release_skills.sh` 打印发版计划并打包，不发布；`python3 scripts/versions.py plan --kit` 只打印计划。两者都需要完整的提交历史与 tag。
+
+## 版本说明
+
+- v1.0（2026-11-03）：发版 tag 改按版本号（「<skill>-vX.Y.Z」「prompt-kit-vX.Y.Z」），不再按日期；各 skill 从 v1.0 起。
 
 ## 参与
 

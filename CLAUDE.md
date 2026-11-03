@@ -14,6 +14,7 @@ This repository is public: code, history, commit e-mails, issues, pull requests 
 
 - Each skill lives in skills/<name>/ with SKILL.md, prompt.md, README.md and README.zh-CN.md; both root READMEs list it. Run python3 scripts/run_checks.py before committing.
 - SKILL.md and prompt.md carry the same rules; a change to one is made to the other in the same pull request, and recorded in the version notes of both skill READMEs.
+- Versions: the newest version note, "- vX.Y (YYYY-MM-DD): ..." in README.md and "- vX.Y（YYYY-MM-DD）：……" in README.zh-CN.md, names the version, the same in both; the root READMEs carry the kit's. A change to SKILL.md or prompt.md raises X.Y (vX.Y.0 is released); a README-only change keeps X.Y and is released as vX.Y.(Z+1). Tags are "<skill>-vX.Y.Z" and "prompt-kit-vX.Y.Z", made by the release workflow only; scripts/versions.py holds the rules and run_checks.py fails a change that breaks them.
 - Skill and prompt text is Chinese; READMEs are written in English and Chinese with the same content.
 
 ## Design before code
